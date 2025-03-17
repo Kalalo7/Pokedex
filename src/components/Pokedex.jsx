@@ -94,10 +94,85 @@ function getTypeColor(type) {
   return colors[type] || '#777';
 }
 
+// Add these new styled components after your existing ones
+const MovesSection = styled.div`
+  margin-top: 20px;
+`;
+
+const GenerationSelect = styled.select`
+  padding: 8px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  margin-bottom: 15px;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: #3f51b5;
+  }
+`;
+
+const MovesList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+`;
+
+const MoveCard = styled.div`
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+`;
+
+// Move FilterSelect styled component outside the Pokedex component (keep it with other styled components)
+const FilterSelect = styled.select`
+  padding: 8px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  margin-left: 10px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: #3f51b5;
+  }
+`;
+
 const Pokedex = () => {
   const [pokemon, setPokemon] = useState(null);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
+  const [selectedGeneration, setSelectedGeneration] = useState('1');
+  const [moveFilter, setMoveFilter] = useState('level-up');
+  
+  // Remove duplicate FilterSelect component and moveFilter state declarations
+  
+  // Modify the getGenerationMoves function
+  const getGenerationMoves = (moves, generation) => {
+    return moves.filter(move => {
+      const versionGroup = move.version_group_details.find(detail => {
+        if (moveFilter !== 'all' && detail.move_learn_method.name !== moveFilter) {
+          return false;
+        }
+        switch(generation) {
+          case '1': return detail.version_group.name === 'red-blue';
+          case '2': return detail.version_group.name === 'gold-silver';
+          case '3': return detail.version_group.name === 'ruby-sapphire';
+          case '4': return detail.version_group.name === 'diamond-pearl';
+          case '5': return detail.version_group.name === 'black-white';
+          case '6': return detail.version_group.name === 'x-y';
+          case '7': return detail.version_group.name === 'sun-moon';
+          case '8': return detail.version_group.name === 'sword-shield';
+          default: return false;
+        }
+      });
+      return versionGroup !== undefined;
+    }).map(move => ({
+      name: move.move.name,
+      level: move.version_group_details[0]?.level_learned_at || 1,
+      method: move.version_group_details[0]?.move_learn_method.name
+    })).sort((a, b) => a.level - b.level);
+  };
 
   const searchPokemon = async () => {
     try {
@@ -135,7 +210,8 @@ const Pokedex = () => {
         image: response.data.sprites.other['official-artwork'].front_default,
         height: response.data.height / 10,
         weight: response.data.weight / 10,
-        evolutions: getEvolutionDetails(evolutionResponse.data.chain)
+        evolutions: getEvolutionDetails(evolutionResponse.data.chain),
+        allMoves: response.data.moves  // Add this line to include all moves data
       };
       setPokemon(pokemon);
     } catch (err) {
@@ -144,6 +220,7 @@ const Pokedex = () => {
     }
   };
 
+  // Replace your existing moves section in the return statement with this:
   return (
     <PokedexContainer>
       <h1 style={{ textAlign: 'center', color: '#333' }}>Pokédex</h1>
@@ -203,19 +280,50 @@ const Pokedex = () => {
             ))}
           </div>
 
-          <h3>Moves:</h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {pokemon.moves.slice(0, 8).map(move => (
-              <div key={move.name} style={{
-                background: '#f0f0f0',
-                padding: '5px 10px',
-                borderRadius: '15px',
-                fontSize: '14px'
-              }}>
-                {move.name} (Lv.{move.level})
-              </div>
-            ))}
-          </div>
+          <MovesSection>
+            <h3>Moves:</h3>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <GenerationSelect 
+                value={selectedGeneration}
+                onChange={(e) => setSelectedGeneration(e.target.value)}
+              >
+                <option value="1">Generation I</option>
+                <option value="2">Generation II</option>
+                <option value="3">Generation III</option>
+                <option value="4">Generation IV</option>
+                <option value="5">Generation V</option>
+                <option value="6">Generation VI</option>
+                <option value="7">Generation VII</option>
+                <option value="8">Generation VIII</option>
+              </GenerationSelect>
+
+              <FilterSelect
+                value={moveFilter}
+                onChange={(e) => setMoveFilter(e.target.value)}
+              >
+                <option value="level-up">Level Up Only</option>
+                <option value="machine">TM/HM</option>
+                <option value="tutor">Move Tutor</option>
+                <option value="egg">Egg Moves</option>
+                <option value="all">All Methods</option>
+              </FilterSelect>
+            </div>
+
+            <MovesList>
+              {getGenerationMoves(pokemon.allMoves, selectedGeneration).map(move => (
+                <MoveCard key={move.name}>
+                  <div style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
+                    {move.name.replace('-', ' ')}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    {move.method === 'level-up' 
+                      ? `Learn at Level ${move.level}` 
+                      : `Learn by ${move.method.replace('-', ' ')}`}
+                  </div>
+                </MoveCard>
+              ))}
+            </MovesList>
+          </MovesSection>
         </PokemonCard>
       )}
     </PokedexContainer>
