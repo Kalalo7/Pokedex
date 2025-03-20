@@ -13,26 +13,60 @@ const SearchBar = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 20px;
+
   input {
-    padding: 10px;
+    padding: 12px 20px;
     border-radius: 20px;
     border: 2px solid #e0e0e0;
-    width: 300px;
+    width: 100%;
     font-size: 16px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #9fa8da;
+    }
+
     &:focus {
       outline: none;
       border-color: #3f51b5;
+      box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
     }
   }
+    
   button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 20px;
     border: none;
     background: #3f51b5;
     color: white;
     cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    
     &:hover {
       background: #303f9f;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    
+    input {
+      margin-bottom: 10px;
+    }
+    
+    button {
+      width: 100%;
     }
   }
 `;
@@ -223,7 +257,7 @@ const Pokedex = () => {
   // Replace your existing moves section in the return statement with this:
   return (
     <PokedexContainer>
-      <h1 style={{ textAlign: 'center', color: '#333' }}>Pokédex</h1>
+      <h1 style={{ textAlign: 'center', color: '#333' }}>La Pokéñex de Ñalfred</h1>
       <SearchBar>
         <input
           type="text"
