@@ -39,14 +39,17 @@ A modern, interactive Pokédex built with React that lets you explore detailed i
 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/pokeapi.git
+```
 
 2. Install dependencies 
 ```bash
 npm install
+```
 
 3. Start the development server
 ```bash
 npm start
+```
 
 ## 🎨 Design Features
 - Modern, clean interface
@@ -64,3 +67,4 @@ This project uses the PokeAPI for fetching Pokémon data, providing accurate and
 MIT License - feel free to use this project for learning and development!
 ```plaintext
 You can save this content directly as `README.md` in your project's root directory.
+```
